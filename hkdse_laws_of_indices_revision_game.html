@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE Laws of Indices Revision Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .heart-bounce { animation: bounce 1s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20%) scale(1.1); }
+        }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .toast {
+            min-width: 250px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        .toast.info { background-color: #3b82f6; }
+        .toast.fade-out { animation: fadeOut 0.5s ease-in forwards; }
+        
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px;}
+        ::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        .format-btn.active {
+            border-color: #f59e0b !important;
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #fde68a !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 selection:bg-amber-500 selection:text-white">
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="login-screen" class="w-full max-w-md glass-panel rounded-3xl p-8 shadow-2xl transition-all duration-500">
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-4">🚀</div>
+            <h1 class="text-2xl font-bold text-white mb-2">HKDSE Mathematics</h1>
+            <h2 class="text-amber-400 font-semibold tracking-wide uppercase text-sm">Laws of Indices Revision</h2>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Class (e.g., 4A)</label>
+                <input type="text" id="student-class" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 uppercase" placeholder="4A">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Class Number</label>
+                <input type="number" id="student-no" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" placeholder="12">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Name</label>
+                <input type="text" id="student-name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" placeholder="Chan Tai Man">
+            </div>
+            <button onclick="login()" class="w-full mt-6 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-3 px-4 rounded-lg transition shadow-lg shadow-amber-500/20 active:scale-95">
+                Start Mission
+            </button>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="hidden w-full max-w-3xl flex flex-col gap-6 transition-all duration-500">
+        
+        <!-- Header -->
+        <div class="glass-panel rounded-2xl p-6 flex justify-between items-center shadow-xl">
+            <div>
+                <h2 class="text-2xl font-bold text-white" id="display-name">Welcome, Student</h2>
+                <p class="text-slate-400 text-sm">Class: <span id="display-class" class="text-amber-400 font-semibold"></span> | No: <span id="display-no" class="text-amber-400 font-semibold"></span></p>
+            </div>
+            <button onclick="logout()" class="text-slate-400 hover:text-white transition text-sm">
+                Switch User 🚪
+            </button>
+        </div>
+
+        <!-- Completion Passport -->
+        <div class="glass-panel rounded-2xl p-6 shadow-xl border border-amber-500/30 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none text-8xl">🎓</div>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-700/60 pb-4">
+                <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+                    🎓 Completion Passport (學習記錄卡)
+                </h3>
+                <div class="flex flex-wrap gap-2 z-10 justify-end">
+                    <button onclick="openReflection()" class="bg-purple-600 hover:bg-purple-500 border border-purple-400 text-white px-3 py-2 rounded-lg transition shadow-lg shadow-purple-500/20 text-sm flex items-center gap-2 active:scale-95">
+                        Self-Reflection 📝
+                    </button>
+                    <button id="btn-submit-teacher" onclick="submitToTeacher()" class="bg-blue-600 hover:bg-blue-500 border border-blue-400 text-white px-3 py-2 rounded-lg font-semibold transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2 active:scale-95">
+                        <span>Submit to Teacher</span> 📧
+                    </button>
+                    <button onclick="resetBadges()" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-slate-200 px-3 py-2 rounded-lg transition text-sm active:scale-95">
+                        Reset 🔄
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                <div class="bg-slate-800/80 rounded-xl p-4 text-center border border-slate-700 transition duration-300" id="badge-card-1">
+                    <div class="text-3xl mb-2" id="badge-icon-1">🔒</div>
+                    <div class="font-bold text-slate-200">Level 1</div>
+                    <div class="text-xs text-slate-400 mb-2">Basic Core</div>
+                    <div id="badge-status-1" class="text-sm font-semibold text-slate-500">Not Attempted</div>
+                </div>
+                <div class="bg-slate-800/80 rounded-xl p-4 text-center border border-slate-700 transition duration-300" id="badge-card-2">
+                    <div class="text-3xl mb-2" id="badge-icon-2">🔒</div>
+                    <div class="font-bold text-slate-200">Level 2</div>
+                    <div class="text-xs text-slate-400 mb-2">Conventional</div>
+                    <div id="badge-status-2" class="text-sm font-semibold text-slate-500">Not Attempted</div>
+                </div>
+                <div class="bg-slate-800/80 rounded-xl p-4 text-center border border-slate-700 transition duration-300" id="badge-card-3">
+                    <div class="text-3xl mb-2" id="badge-icon-3">🔒</div>
+                    <div class="font-bold text-slate-200">Level 3</div>
+                    <div class="text-xs text-slate-400 mb-2">Numeral Bases</div>
+                    <div id="badge-status-3" class="text-sm font-semibold text-slate-500">Not Attempted</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 shadow-xl">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 text-center">
+                📋 Practice Format (選取題目模式)
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button id="mode-all" onclick="selectFormatMode('all')" class="format-btn active border-2 border-slate-700 bg-slate-800 text-slate-400 py-2.5 px-3 rounded-lg font-bold text-sm transition active:scale-95">
+                    Mixed (混合)
+                </button>
+                <button id="mode-mc" onclick="selectFormatMode('mc')" class="format-btn border-2 border-slate-700 bg-slate-800 text-slate-400 py-2.5 px-3 rounded-lg font-bold text-sm transition active:scale-95">
+                    MC Only (選擇題)
+                </button>
+                <button id="mode-fill" onclick="selectFormatMode('fill')" class="format-btn border-2 border-slate-700 bg-slate-800 text-slate-400 py-2.5 px-3 rounded-lg font-bold text-sm transition active:scale-95">
+                    Conventional (填空/問答)
+                </button>
+            </div>
+            <p id="mode-desc" class="text-xs text-slate-400 mt-3 text-center italic">
+                Will mix Multiple Choice & Conventional Fill-in questions automatically.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button onclick="startGame(1)" class="glass-panel rounded-2xl p-6 text-left hover:-translate-y-1 transition duration-300 border-t-4 border-green-500 group relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-xl text-white group-hover:text-green-400 transition">Level 1</h3>
+                    <span class="text-2xl group-hover:scale-110 transition">🟢</span>
+                </div>
+                <p class="text-slate-400 text-sm relative z-10">Basic simplification and positive indices. (Core)</p>
+            </button>
+
+            <button onclick="startGame(2)" class="glass-panel rounded-2xl p-6 text-left hover:-translate-y-1 transition duration-300 border-t-4 border-amber-500 group relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-xl text-white group-hover:text-amber-400 transition">Level 2</h3>
+                    <span class="text-2xl group-hover:scale-110 transition">🟡</span>
+                </div>
+                <p class="text-slate-400 text-sm relative z-10">Double variable fractions with positive indices representation.</p>
+            </button>
+
+            <button onclick="startGame(3)" class="glass-panel rounded-2xl p-6 text-left hover:-translate-y-1 transition duration-300 border-t-4 border-red-500 group relative overflow-hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-bold text-xl text-white group-hover:text-red-400 transition">Level 3</h3>
+                    <span class="text-2xl group-hover:scale-110 transition">🔴</span>
+                </div>
+                <p class="text-slate-400 text-sm relative z-10">Large base conversion & variables in exponents.</p>
+            </button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="hidden w-full max-w-2xl flex flex-col gap-4">
+        
+        <div class="flex justify-between items-center bg-slate-800 rounded-full px-6 py-3 shadow-lg border border-slate-700">
+            <div class="font-bold text-amber-400" id="level-indicator">Level 1</div>
+            <div class="flex gap-1 text-xl" id="lives-container">
+                <!-- Hearts injected here -->
+            </div>
+            <div class="text-slate-300 font-mono bg-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
+                Q: <span id="q-counter">1/5</span>
+            </div>
+            <button onclick="quitGame()" class="text-slate-500 hover:text-red-400 transition text-xs font-bold uppercase tracking-wider">
+                Abort
+            </button>
+        </div>
+
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl text-center min-h-[350px] flex flex-col relative w-full overflow-hidden" id="main-game-area">
+            
+            <div class="w-full flex justify-between items-center mb-2 border-b border-slate-700/50 pb-3">
+                <div class="flex flex-col text-left">
+                    <h3 class="text-slate-300 text-sm font-semibold">Simplify the expression:</h3>
+                    <span class="text-xs text-amber-400 font-semibold" id="format-hint"></span>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="askAITutor()" class="text-[10px] sm:text-xs bg-purple-600/20 text-purple-300 border border-purple-500/30 px-3 py-1.5 rounded-full hover:bg-purple-600/40 transition font-bold active:scale-95 flex items-center gap-1">
+                        Ask AI ✨
+                    </button>
+                    <button onclick="toggleCheatSheet()" class="text-[10px] sm:text-xs bg-blue-600/20 text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-full hover:bg-blue-600/40 transition active:scale-95 flex items-center gap-1">
+                        Formulas 💡
+                    </button>
+                </div>
+            </div>
+
+            <div id="question-display" class="text-3xl sm:text-4xl text-white mb-6 overflow-x-auto py-6 flex items-center justify-center min-h-[120px]">
+                <!-- MathJax renders here -->
+            </div>
+            
+            <div id="mc-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden w-full mt-auto">
+                <button onclick="submitMCAnswer(0)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+                <button onclick="submitMCAnswer(1)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+                <button onclick="submitMCAnswer(2)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+                <button onclick="submitMCAnswer(3)" class="option-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl p-4 text-xl transition-all shadow-md active:scale-95 min-h-[64px] flex items-center justify-center"></button>
+            </div>
+
+            <div id="conventional-area" class="hidden flex flex-col items-center gap-4 w-full max-w-md mx-auto mt-auto">
+                <p class="text-[11px] text-slate-400 text-center leading-tight">
+                    Use <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>^</code> for indices & <code class='bg-slate-800 px-1 py-0.5 rounded text-amber-300 font-mono'>/</code> for fractions.<br>
+                    E.g. <span class='font-mono text-emerald-400'>x^8/y^6</span> or <span class='font-mono text-emerald-400'>16x^11</span>
+                </p>
+
+                <div class="flex gap-2 w-full">
+                    <input type="text" id="conventional-input" placeholder="e.g. x^8/y^6" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-lg font-mono text-white outline-none focus:border-amber-500 transition shadow-inner" oninput="updateLivePreview()" onkeypress="handleEnter(event)">
+                    <button onclick="submitFillAnswer()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-6 rounded-lg text-base transition shadow-md active:scale-95">
+                        Submit
+                    </button>
+                </div>
+
+                <div id="helper-buttons" class="flex flex-wrap gap-2 justify-center w-full mt-1">
+                    <!-- dynamically injected helper buttons -->
+                </div>
+
+                <div class="w-full p-4 bg-slate-900/60 border border-slate-700 rounded-lg text-center min-h-[80px] flex flex-col justify-center items-center mt-2">
+                    <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Live Math Preview</span>
+                    <div id="math-preview" class="text-xl text-slate-300 min-h-[30px] flex items-center justify-center">\( \text{Empty} \)</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CHEAT SHEET MODAL -->
+    <div id="cheat-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity" onclick="if(event.target===this) toggleCheatSheet()">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-600 max-w-sm w-full shadow-2xl">
+            <h3 class="text-2xl font-bold text-amber-400 mb-4 border-b border-slate-700 pb-2">Laws of Indices</h3>
+            <ul class="space-y-4 text-lg font-serif">
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Multiplication:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(a^m \cdot a^n = a^{m+n}\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Division:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(\frac{a^m}{a^n} = a^{m-n}\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Power of Power:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\((a^m)^n = a^{mn}\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Power of Product:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\((ab)^n = a^n b^n\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Negative Index:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(a^{-n} = \frac{1}{a^n}\)</span></li>
+                <li class="flex justify-between items-center"><span class="text-slate-300 text-sm font-sans">Zero Index:</span> <span class="bg-slate-900/80 px-2 py-1 rounded text-white border border-slate-700">\(a^0 = 1\)</span></li>
+            </ul>
+            <button onclick="toggleCheatSheet()" class="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg active:scale-95 transition">Close</button>
+        </div>
+    </div>
+
+    <!-- AI TUTOR MODAL -->
+    <div id="ai-tutor-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity" onclick="if(event.target===this) closeAITutor()">
+        <div class="glass-panel border border-purple-500/50 max-w-lg w-full rounded-2xl shadow-2xl p-6 flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
+                <h3 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 flex items-center gap-2">
+                    <span>✨ AI Tutor (HKDSE 導師)</span>
+                </h3>
+                <button onclick="closeAITutor()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div id="ai-content-area" class="flex-1 overflow-y-auto pr-2 space-y-4 text-slate-200 text-sm sm:text-base leading-relaxed">
+                <!-- AI tutor contents rendered here -->
+            </div>
+            
+            <button onclick="closeAITutor()" class="mt-6 w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl transition active:scale-95">
+                Got it, thanks!
+            </button>
+        </div>
+    </div>
+
+    <!-- WRONG ANSWER LAW REFLECTION MODAL -->
+    <div id="wrong-reflection-modal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center z-[60] p-4 backdrop-blur-md transition-opacity">
+        <div class="glass-panel border-2 border-red-500/40 max-w-md w-full rounded-2xl shadow-2xl p-6 flex flex-col">
+            <div class="flex items-center gap-3 mb-4 border-b border-slate-700 pb-3">
+                <span class="text-3xl">🛑</span>
+                <h3 class="text-xl font-bold text-red-400">Wait! Let's Reflect</h3>
+            </div>
+            <p class="text-slate-300 mb-6 text-sm">You got that one wrong. Before moving on, which <strong>Law of Indices</strong> was primarily needed to solve that question?</p>
+
+            <div class="space-y-3">
+                <button onclick="submitWrongReflection('power_of_power')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Power of a Power</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\((a^m)^n = a^{mn}\)</span>
+                </button>
+                <button onclick="submitWrongReflection('power_of_product')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Power of a Product</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\((ab)^n = a^n b^n\)</span>
+                </button>
+                <button onclick="submitWrongReflection('base_conversion')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Base Conversion</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(e.g., 9 = 3^2\)</span>
+                </button>
+                <button onclick="submitWrongReflection('multiplication_division')" class="w-full text-left px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition active:scale-95 flex items-center justify-between group">
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white">Multiplication / Division</span>
+                    <span class="font-serif bg-slate-900 px-2 py-1 rounded text-xs text-amber-300">\(a^m \cdot a^n = a^{m+n}\)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WRONG ANSWER FEEDBACK MODAL -->
+    <div id="feedback-toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-red-950/90 backdrop-blur-md border-2 border-red-500 text-red-100 px-6 py-4 rounded-xl shadow-2xl hidden z-50 text-center max-w-sm w-full transition-all">
+        <div class="flex items-center justify-center gap-2 mb-1">
+            <span class="text-2xl">❌</span>
+            <p class="font-bold text-lg">Incorrect Answer!</p>
+        </div>
+        <p class="text-sm text-red-300 mt-1">Check variable names and exponents. (Remember: Positive indices only!)</p>
+    </div>
+
+    <!-- SELF-REFLECTION MODAL -->
+    <div id="reflection-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity" onclick="if(event.target===this) closeReflection()">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-600 max-w-md w-full shadow-2xl">
+            <h3 class="text-2xl font-bold text-amber-400 mb-2 border-b border-slate-700 pb-2">Student Self-Reflection</h3>
+            <p class="text-sm text-slate-400 mb-4">Take a moment to reflect on your learning progress before submitting.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">How well do you understand Laws of Indices now?</label>
+                    <select id="reflect-rating" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white outline-none focus:border-amber-500">
+                        <option value="0">-- Select --</option>
+                        <option value="1">1 - Still very confused 😕</option>
+                        <option value="2">2 - Need more practice 😐</option>
+                        <option value="3">3 - Getting the hang of it 🙂</option>
+                        <option value="4">4 - Mostly confident 😊</option>
+                        <option value="5">5 - Completely mastered it! 🚀</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">What was the most difficult part?</label>
+                    <textarea id="reflect-difficult" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white outline-none focus:border-amber-500 placeholder-slate-500" placeholder="e.g., Dealing with negative indices in denominators..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">What is your goal for next time?</label>
+                    <textarea id="reflect-goal" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white outline-none focus:border-amber-500 placeholder-slate-500" placeholder="e.g., I will double-check my multiplication..."></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeReflection()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded-lg transition active:scale-95">Cancel</button>
+                <button onclick="saveReflection()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-lg transition active:scale-95">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Updated Google Apps Script URL with tracking enabled
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSDVadcfghtaNrL-kA5n8tcYELw4prjFxF9Eh8PX4ESX2SxVlMZZFJZHvVK58x7iDEjQ/exec';
+
+        let studentProfile = null;
+        let badgeRecords = { level1: false, level2: false, level3: false };
+        let studentReflection = { rating: "0", difficult: "", goal: "" };
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let lives = 3;
+        let currentQuestions = [];
+        let selectedFormat = 'all'; // 'all', 'mc', 'fill'
+        let currentQuestionMode = 'mc'; // state for current specific question
+        
+        // Tracking variables for correct percentage
+        let levelStats = { 
+            level1: { correct: 0, total: 0 }, 
+            level2: { correct: 0, total: 0 }, 
+            level3: { correct: 0, total: 0 } 
+        };
+
+        // --- MATH GENERATOR ENGINE (Robust Version) ---
+        const MathGen = {
+            rand: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
+            shuffle: (array) => [...array].sort(() => Math.random() - 0.5),
+            
+            generateL1: function() {
+                const variables = ['x', 'y', 'a', 'b', 'm', 'n'];
+                const v = variables[this.rand(0, variables.length - 1)];
+                
+                if (Math.random() < 0.5) {
+                    let coeffVal = this.rand(2, 4);
+                    let b = this.rand(1, 4);
+                    let c = this.rand(2, 3);
+                    let d = this.rand(2, 4);
+                    
+                    let coeff = Math.pow(coeffVal, c);
+                    let exp = (b * c) + d;
+                    
+                    let qText = `(${coeffVal}${v}^{${b}})^{${c}} \\cdot ${v}^{${d}}`;
+                    if(b === 1) qText = `(${coeffVal}${v})^{${c}} \\cdot ${v}^{${d}}`;
+                    
+                    let ansStr = `${coeff}${v}^${exp}`;
+                    let ansTex = `${coeff}${v}^{${exp}}`;
+                    
+                    let w1 = `${coeffVal * c}${v}^{${exp}}`;
+                    let w2 = `${coeff}${v}^{${b + c + d}}`;
+                    let w3 = `${coeff}${v}^{${b * c * d}}`;
+                    
+                    return {
+                        text: `$ ${qText} $`, answerStr: ansStr, mcAnswerStr: ansTex,
+                        variables: [v], options: this.shuffle([ansTex, w1, w2, w3].map(o => `$ ${o} $`)),
+                        firstStepLaw: 'power_of_power'
+                    };
+                } else {
+                    let coeffVal = this.rand(2, 4);
+                    let b = this.rand(3, 6);
+                    let c = this.rand(2, 4);
+                    let d = this.rand(2, (b * c) - 1);
+                    
+                    let coeff = Math.pow(coeffVal, c) / coeffVal;
+                    let exp = (b * c) - d;
+                    
+                    let qText = `\\frac{(${coeffVal}${v}^{${b}})^{${c}}}{${coeffVal}${v}^{${d}}}`;
+                    let ansStr = coeff === 1 ? `${v}^${exp}` : `${coeff}${v}^${exp}`;
+                    let ansTex = coeff === 1 ? `${v}^{${exp}}` : `${coeff}${v}^{${exp}}`;
+                    
+                    let w1 = `${Math.pow(coeffVal, c-1)}${v}^{${b+c-d}}`;
+                    let w2 = `${(coeffVal*c)/coeffVal}${v}^{${exp}}`;
+                    let w3 = `${coeff}${v}^{${b*c + d}}`;
+                    
+                    return {
+                        text: `$ ${qText} $`, answerStr: ansStr, mcAnswerStr: ansTex,
+                        variables: [v], options: this.shuffle([ansTex, w1, w2, w3].map(o => `$ ${o} $`)),
+                        firstStepLaw: 'power_of_power'
+                    };
+                }
+            },
+            
+            generateL2: function() {
+                const varPairs = [ ['x', 'y'], ['m', 'n'], ['a', 'b'] ];
+                const [u, v] = varPairs[this.rand(0, varPairs.length - 1)];
+                const structureType = this.rand(0, 2);
+                
+                let qText = "", ansStr = "", ansTex = "", w1 = "", w2 = "", w3 = "", firstLaw = 'power_of_power';
+                const fmtExpTex = (val) => val === 1 ? "" : `^{${val}}`;
+                const fmtBaseTex = (base, exp) => exp === 0 ? "" : `${base}${fmtExpTex(exp)}`;
+                const fmtExpStr = (val) => val === 1 ? "" : `^${val}`;
+                
+                if (structureType === 0) {
+                    let a = this.rand(-3, 5); if (a === 0) a = 2;
+                    let b = this.rand(-3, 4); if (b === 0) b = -2;
+                    let c = this.rand(2, 4);
+                    let Eu = this.rand(2, 8);  
+                    let Ev = this.rand(-8, -2); 
+                    let absEv = Math.abs(Ev);
+                    
+                    let d = a * c - Eu;
+                    let e = b * c - Ev;
+                    
+                    let numInner = `${fmtBaseTex(u, a)}${fmtBaseTex(v, b)}`;
+                    let den = `${fmtBaseTex(u, d)}${fmtBaseTex(v, e)}`;
+                    if (d === 0 && e === 0) den = "1";
+                    
+                    qText = `\\frac{(${numInner})^{${c}}}{${den}}`;
+                    ansStr = `${u}${fmtExpStr(Eu)}/${v}${fmtExpStr(absEv)}`;
+                    ansTex = `\\frac{${u}^{${Eu}}}{${v}^{${absEv}}}`;
+                    
+                    w1 = `\\frac{${v}^{${absEv}}}{${u}^{${Eu}}}`;
+                    w2 = `\\frac{${u}^{${Eu + 2}}}{${v}^{${absEv}}}`;
+                    w3 = `\\frac{${u}^{${Eu}}}{${v}^{${absEv + 2}}}`;
+                } else if (structureType === 1) {
+                    let c = this.rand(2, 4);
+                    let d = this.rand(-3, 3); if (d === 0) d = -2;
+                    let e = this.rand(2, 3);
+                    let Eu = this.rand(-8, -2); 
+                    let Ev = this.rand(2, 8);  
+                    let absEu = Math.abs(Eu);
+                    
+                    let a = c * e + Eu;
+                    let b = d * e + Ev;
+                    
+                    let num = `${fmtBaseTex(u, a)}${fmtBaseTex(v, b)}`;
+                    let denInner = `${fmtBaseTex(u, c)}${fmtBaseTex(v, d)}`;
+                    
+                    qText = `\\frac{${num}}{(${denInner})^{${e}}}`;
+                    ansStr = `${v}${fmtExpStr(Ev)}/${u}${fmtExpStr(absEu)}`;
+                    ansTex = `\\frac{${v}^{${Ev}}}{${u}^{${absEu}}}`;
+                    
+                    w1 = `\\frac{${u}^{${absEu}}}{${v}^{${Ev}}}`;
+                    w2 = `\\frac{${v}^{${Ev + 2}}}{${u}^{${absEu}}}`;
+                    w3 = `\\frac{${v}^{${Ev}}}{${u}^{${absEu + 2}}}`;
+                } else {
+                    let a = this.rand(-3, -1);
+                    let b = this.rand(2, 4);
+                    let c = this.rand(2, 6);
+                    firstLaw = 'power_of_product';
+                    
+                    let Eu = b;
+                    let Ev = a * b - c; 
+                    let absEv = Math.abs(Ev);
+                    
+                    let numInner = `${u}${fmtBaseTex(v, a)}`;
+                    qText = `\\frac{(${numInner})^{${b}}}{${v}^{${c}}}`;
+                    
+                    ansStr = `${u}${fmtExpStr(Eu)}/${v}${fmtExpStr(absEv)}`;
+                    ansTex = `\\frac{${u}^{${Eu}}}{${v}^{${absEv}}}`;
+                    
+                    w1 = `\\frac{${v}^{${absEv}}}{${u}^{${Eu}}}`;
+                    w2 = `\\frac{${u}^{${Eu + 1}}}{${v}^{${absEv}}}`;
+                    w3 = `\\frac{${u}^{${Eu}}}{${v}^{${absEv + 1}}}`;
+                }
+                return {
+                    text: `$ ${qText} $`, answerStr: ansStr, mcAnswerStr: ansTex,
+                    variables: [u, v], options: this.shuffle([ansTex, w1, w2, w3].map(o => `$ ${o} $`)),
+                    firstStepLaw: firstLaw
+                };
+            },
+            
+            generateL3: function() {
+                let type = this.rand(0, 2);
+                let qText = "", ansStr = "", ansTex = "", w1 = "", w2 = "", w3 = "";
+                let firstLaw = "";
+                let v = ['n', 'k', 'x'][this.rand(0, 2)];
+
+                if (type === 0) {
+                    // Type A: (b^2)^{n+k} / b^{2n}
+                    let b = this.rand(2, 4); // base 2, 3, 4
+                    let bSq = b * b; // 4, 9, 16
+                    let k = this.rand(1, 3);
+                    qText = `\\frac{${bSq}^{${v}+${k}}}{${b}^{2${v}}}`; 
+                    ansStr = Math.pow(b, 2 * k).toString();
+                    ansTex = ansStr;
+                    w1 = Math.pow(b, k).toString();
+                    w2 = `${b}^{4${v}}`;
+                    w3 = Math.pow(b, 2 * k + 1).toString();
+                    firstLaw = "base_conversion";
+                } else if (type === 1) {
+                    // Type B: (b1)^n * (b2)^(p*n) = (ansBase)^(p*n)
+                    let tmpl = [
+                        { b1: 8, b2: 5, p2: 3, ab: 10, pm: 3 }, // 8^n * 5^{3n} = 10^{3n}
+                        { b1: 4, b2: 5, p2: 2, ab: 10, pm: 2 }, // 4^n * 5^{2n} = 10^{2n}
+                        { b1: 27, b2: 2, p2: 3, ab: 6, pm: 3 }  // 27^n * 2^{3n} = 6^{3n}
+                    ][this.rand(0, 2)];
+                    qText = `${tmpl.b1}^{${v}} \\cdot ${tmpl.b2}^{${tmpl.p2}${v}}`;
+                    ansStr = `${tmpl.ab}^(${tmpl.pm}${v})`; // Format expected if typed
+                    ansTex = `${tmpl.ab}^{${tmpl.pm}${v}}`;
+                    w1 = `${tmpl.b1 * tmpl.b2}^{${tmpl.p2}${v}}`;
+                    w2 = `${tmpl.ab}^{${tmpl.pm + 1}${v}}`;
+                    w3 = `${tmpl.b1 * tmpl.b2}^{${v}}`;
+                    firstLaw = "power_of_product_reverse";
+                } else {
+                    // Type C: (2^{n+k} * 8^{n-j}) / 4^{2n}
+                    let k = this.rand(1, 3);
+                    let j = this.rand(1, 2);
+                    let exp = k - 3 * j;
+                    qText = `\\frac{2^{${v}+${k}} \\cdot 8^{${v}-${j}}}{4^{2${v}}}`;
+                    if (exp >= 0) {
+                        ansStr = Math.pow(2, exp).toString();
+                        ansTex = ansStr;
+                    } else {
+                        ansStr = "1/" + Math.pow(2, -exp).toString();
+                        ansTex = `\\frac{1}{${Math.pow(2, -exp)}}`;
+                    }
+                    w1 = (exp >= 0) ? `2^{${exp+1}}` : `\\frac{1}{${Math.pow(2, -exp+1)}}`;
+                    w2 = `2^{${v}}`;
+                    w3 = `4`;
+                    firstLaw = "base_conversion";
+                }
+                
+                return {
+                    text: `$ ${qText} $`, answerStr: ansStr, mcAnswerStr: ansTex,
+                    variables: [v], options: this.shuffle([ansTex, w1, w2, w3].map(o => `$ ${o} $`)),
+                    firstStepLaw: firstLaw
+                };
+            }
+        };
+
+        // --- CORE GAME LOGIC ---
+
+        function login() {
+            const sClass = document.getElementById('student-class').value.trim().toUpperCase();
+            const sNo = document.getElementById('student-no').value.trim();
+            const sName = document.getElementById('student-name').value.trim();
+
+            if (!sClass || !sNo || !sName) {
+                showToast("Please fill in all details to start.", "error");
+                return;
+            }
+
+            studentProfile = { class: sClass, no: sNo, name: sName };
+            document.getElementById('display-name').textContent = `Welcome, ${sName}`;
+            document.getElementById('display-class').textContent = sClass;
+            document.getElementById('display-no').textContent = sNo;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            
+            updatePassportUI();
+            showToast(`Welcome aboard, ${sName}!`, "success");
+        }
+
+        function logout() {
+            studentProfile = null;
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('student-class').value = '';
+            document.getElementById('student-no').value = '';
+            document.getElementById('student-name').value = '';
+        }
+
+        function selectFormatMode(mode) {
+            selectedFormat = mode;
+            document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            
+            const descMap = {
+                'all': 'Will mix Multiple Choice & Conventional Fill-in questions automatically.',
+                'mc': 'All questions will be multiple choice.',
+                'fill': 'All questions will require you to type the answer.'
+            };
+            document.getElementById('mode-desc').textContent = descMap[mode];
+        }
+
+        function updatePassportUI() {
+            for (let i = 1; i <= 3; i++) {
+                const statusEl = document.getElementById(`badge-status-${i}`);
+                const iconEl = document.getElementById(`badge-icon-${i}`);
+                const cardEl = document.getElementById(`badge-card-${i}`);
+                
+                if (badgeRecords[`level${i}`]) {
+                    statusEl.textContent = "Completed ✅";
+                    statusEl.className = "text-sm font-semibold text-green-400";
+                    iconEl.textContent = "🏆";
+                    cardEl.classList.add('border-amber-500');
+                } else {
+                    statusEl.textContent = "Not Attempted";
+                    statusEl.className = "text-sm font-semibold text-slate-500";
+                    iconEl.textContent = "🔒";
+                    cardEl.classList.remove('border-amber-500');
+                }
+            }
+        }
+
+        function resetBadges() {
+            if(confirm("Are you sure you want to reset your progress?")) {
+                badgeRecords = { level1: false, level2: false, level3: false };
+                levelStats = { level1: { correct: 0, total: 0 }, level2: { correct: 0, total: 0 }, level3: { correct: 0, total: 0 } };
+                updatePassportUI();
+                showToast("Progress reset.", "info");
+            }
+        }
+
+        function startGame(level) {
+            currentLevel = level;
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            const levelColors = ['text-green-400', 'text-amber-400', 'text-red-400'];
+            document.getElementById('level-indicator').className = `font-bold ${levelColors[level-1]}`;
+            document.getElementById('level-indicator').textContent = `Level ${level}`;
+
+            lives = 3;
+            currentQuestionIndex = 0;
+            currentQuestions = [];
+            
+            // Generate 5 questions for the selected level
+            for(let i=0; i<5; i++) {
+                if (level === 1) currentQuestions.push(MathGen.generateL1());
+                else if (level === 2) currentQuestions.push(MathGen.generateL2());
+                else if (level === 3) currentQuestions.push(MathGen.generateL3());
+            }
+            
+            updateLivesUI();
+            renderQuestion();
+        }
+
+        function updateLivesUI() {
+            const container = document.getElementById('lives-container');
+            container.innerHTML = '';
+            for (let i = 0; i < lives; i++) {
+                container.innerHTML += '<span class="heart-bounce">❤️</span>';
+            }
+            for (let i = lives; i < 3; i++) {
+                container.innerHTML += '<span class="opacity-30 grayscale">❤️</span>';
+            }
+        }
+
+        function renderQuestion() {
+            document.getElementById('q-counter').textContent = `${currentQuestionIndex + 1}/5`;
+            const q = currentQuestions[currentQuestionIndex];
+            
+            const displayEl = document.getElementById('question-display');
+            displayEl.innerHTML = q.text;
+            
+            // Determine Mode for this specific question
+            if (selectedFormat === 'all') {
+                currentQuestionMode = Math.random() > 0.5 ? 'mc' : 'fill';
+                // Level 3 type B string formatting is tricky, bias towards MC for L3
+                if(currentLevel === 3 && q.answerStr.includes('(')) currentQuestionMode = 'mc';
+            } else {
+                currentQuestionMode = selectedFormat;
+            }
+
+            const mcArea = document.getElementById('mc-options');
+            const fillArea = document.getElementById('conventional-area');
+            const hint = document.getElementById('format-hint');
+
+            if (currentQuestionMode === 'mc') {
+                mcArea.classList.remove('hidden');
+                fillArea.classList.add('hidden');
+                hint.textContent = "Multiple Choice Mode";
+                
+                const btns = mcArea.querySelectorAll('button');
+                btns.forEach((btn, idx) => {
+                    btn.innerHTML = q.options[idx];
+                });
+            } else {
+                mcArea.classList.add('hidden');
+                fillArea.classList.remove('hidden');
+                hint.textContent = "Fill-in Mode";
+                
+                document.getElementById('conventional-input').value = '';
+                document.getElementById('math-preview').innerHTML = '\\( \\text{Empty} \\)';
+                
+                // Inject helper buttons based on variables
+                const helperBox = document.getElementById('helper-buttons');
+                helperBox.innerHTML = '';
+                q.variables.forEach(v => {
+                    helperBox.innerHTML += `<button onclick="insertAtCursor('${v}')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-amber-200 font-mono text-sm transition">${v}</button>`;
+                });
+                helperBox.innerHTML += `<button onclick="insertAtCursor('^')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-white font-mono text-sm transition">^</button>`;
+                helperBox.innerHTML += `<button onclick="insertAtCursor('/')" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-white font-mono text-sm transition">/</button>`;
+            }
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function insertAtCursor(myValue) {
+            const myField = document.getElementById('conventional-input');
+            if (document.selection) {
+                myField.focus();
+                sel = document.selection.createRange();
+                sel.text = myValue;
+            } else if (myField.selectionStart || myField.selectionStart == '0') {
+                var startPos = myField.selectionStart;
+                var endPos = myField.selectionEnd;
+                myField.value = myField.value.substring(0, startPos) + myValue + myField.value.substring(endPos, myField.value.length);
+                myField.selectionStart = startPos + myValue.length;
+                myField.selectionEnd = startPos + myValue.length;
+            } else {
+                myField.value += myValue;
+            }
+            myField.focus();
+            updateLivePreview();
+        }
+
+        function handleEnter(e) {
+            if(e.key === 'Enter') submitFillAnswer();
+        }
+
+        function normalizeString(str) {
+            return str.replace(/\s+/g, '').toLowerCase().replace(/[\(\)]/g, ''); // strip spaces, lower case, strip parens
+        }
+
+        function submitMCAnswer(btnIndex) {
+            const q = currentQuestions[currentQuestionIndex];
+            const selectedText = q.options[btnIndex];
+            const isCorrect = (selectedText === `$ ${q.mcAnswerStr} $`);
+            processAnswer(isCorrect);
+        }
+
+        function submitFillAnswer() {
+            const q = currentQuestions[currentQuestionIndex];
+            const rawInput = document.getElementById('conventional-input').value;
+            
+            if(!rawInput.trim()) {
+                showToast("Please enter an answer.", "info");
+                return;
+            }
+
+            const cleanInput = normalizeString(rawInput);
+            const cleanTarget = normalizeString(q.answerStr);
+            
+            // Allow 1/x^2 to match 1/x^2 (exact)
+            const isCorrect = (cleanInput === cleanTarget);
+            processAnswer(isCorrect);
+        }
+
+        function processAnswer(isCorrect) {
+            // Track total attempts for the current level
+            levelStats[`level${currentLevel}`].total++;
+            
+            if (isCorrect) {
+                // Track correct attempts
+                levelStats[`level${currentLevel}`].correct++;
+                showToast("Correct! Awesome job.", "success");
+                currentQuestionIndex++;
+                
+                if (currentQuestionIndex >= 5) {
+                    winGame();
+                } else {
+                    renderQuestion();
+                }
+            } else {
+                // Instantly pop up the wrong reflection modal before deducting life
+                showWrongReflectionModal();
+            }
+        }
+
+        function showWrongReflectionModal() {
+            const modal = document.getElementById('wrong-reflection-modal');
+            modal.classList.remove('hidden');
+            if(window.MathJax) MathJax.typesetPromise([modal]);
+        }
+
+        function submitWrongReflection(selectedLaw) {
+            const q = currentQuestions[currentQuestionIndex];
+            const actualLaw = q.firstStepLaw;
+
+            // Simple logic check
+            let isLawCorrect = false;
+            if (selectedLaw === actualLaw) isLawCorrect = true;
+            if (selectedLaw === 'power_of_product' && actualLaw === 'power_of_product_reverse') isLawCorrect = true;
+
+            document.getElementById('wrong-reflection-modal').classList.add('hidden');
+
+            if (isLawCorrect) {
+                showToast("Good reflection! You identified the correct law to start with.", "success");
+            } else {
+                showToast("Not quite! Remember to check the Formula sheet or ask AI Tutor.", "error");
+            }
+
+            // Deduct life and shake the game screen to indicate a mistake
+            lives--;
+            updateLivesUI();
+            showWrongFeedback();
+            
+            const gameArea = document.getElementById('main-game-area');
+            gameArea.classList.add('shake');
+            setTimeout(() => gameArea.classList.remove('shake'), 400);
+
+            if (lives <= 0) {
+                setTimeout(() => {
+                    showToast("Mission Failed. Out of lives!", "error");
+                    quitGame();
+                }, 500);
+            }
+        }
+
+        function winGame() {
+            badgeRecords[`level${currentLevel}`] = true;
+            showToast(`Level ${currentLevel} Complete! Badge Earned! 🏆`, "success");
+            quitGame();
+        }
+
+        function quitGame() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            updatePassportUI();
+        }
+
+        // Live Math Preview for Fill-in Mode
+        function updateLivePreview() {
+            const input = document.getElementById('conventional-input').value;
+            const previewBox = document.getElementById('math-preview');
+            
+            if(!input.trim()) {
+                previewBox.innerHTML = '\\( \\text{Empty} \\)';
+                if(window.MathJax) MathJax.typesetPromise([previewBox]);
+                return;
+            }
+
+            let texStr = input;
+            
+            // Simple parsing: a/b -> \frac{a}{b}
+            if(texStr.includes('/')) {
+                const parts = texStr.split('/');
+                if(parts.length === 2) {
+                    texStr = `\\frac{${parts[0]}}{${parts[1]}}`;
+                }
+            }
+            
+            // Reformat x^2 -> x^{2} for safety visually (MathJax handles x^2 fine mostly)
+            texStr = texStr.replace(/\^([a-zA-Z0-9]+)/g, '^{$1}');
+            
+            previewBox.innerHTML = `$ ${texStr} $`;
+            if (window.MathJax) {
+                MathJax.typesetPromise([previewBox]).catch(err => console.log('MathJax Error:', err));
+            }
+        }
+
+        // --- HELPER UI FUNCTIONS ---
+
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        function showWrongFeedback() {
+            const el = document.getElementById('feedback-toast');
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 3000);
+        }
+
+        function toggleCheatSheet() {
+            const modal = document.getElementById('cheat-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function closeAITutor() {
+            document.getElementById('ai-tutor-modal').classList.add('hidden');
+        }
+
+        function askAITutor() {
+            const q = currentQuestions[currentQuestionIndex];
+            let hint = "";
+            switch (q.firstStepLaw) {
+                case 'power_of_power':
+                    hint = "Use the Power of a Power property: $(x^a)^b = x^{ab}$. Multiply the indices outside the bracket with those inside.";
+                    break;
+                case 'power_of_product':
+                    hint = "Apply the index to everything inside the bracket: $(xy)^n = x^n y^n$. Don't forget to apply it to the coefficient too!";
+                    break;
+                case 'base_conversion':
+                    hint = "Convert all numbers to the same prime base (e.g., $9 = 3^2$, $8 = 2^3$) before combining the indices.";
+                    break;
+                case 'power_of_product_reverse':
+                    hint = "If the indices are the same, you can combine the bases: $a^n b^n = (ab)^n$. Try to make the indices match first!";
+                    break;
+                default:
+                    hint = "Remember your basic laws: $a^m \\cdot a^n = a^{m+n}$ and $\\frac{a^m}{a^n} = a^{m-n}$.";
+            }
+
+            document.getElementById('ai-content-area').innerHTML = `
+                <div class="bg-slate-800/80 p-5 rounded-lg border border-purple-500/30 mb-4 shadow-inner">
+                    <p class="text-purple-300 font-semibold mb-2 text-lg">🤖 AI Hint specifically for this question:</p>
+                    <p class="text-white text-base">${hint}</p>
+                </div>
+                <div class="bg-slate-800/80 p-5 rounded-lg border border-slate-600 shadow-inner">
+                    <p class="text-amber-400 font-semibold mb-2 text-lg">💡 General Checklist:</p>
+                    <ul class="list-disc list-inside space-y-2 text-slate-300">
+                        <li>Have you made all negative indices positive? ($x^{-n} = \\frac{1}{x^n}$)</li>
+                        <li>Did you simplify the numbers (coefficients) just like normal fractions?</li>
+                        <li>Check your positive/negative signs when adding or subtracting indices!</li>
+                    </ul>
+                </div>
+            `;
+            document.getElementById('ai-tutor-modal').classList.remove('hidden');
+            if(window.MathJax) MathJax.typesetPromise();
+        }
+
+        // --- REFLECTION & SUBMISSION LOGIC ---
+
+        function openReflection() {
+            document.getElementById('reflection-modal').classList.remove('hidden');
+            document.getElementById('reflect-rating').value = studentReflection.rating;
+            document.getElementById('reflect-difficult').value = studentReflection.difficult;
+            document.getElementById('reflect-goal').value = studentReflection.goal;
+        }
+
+        function closeReflection() {
+            document.getElementById('reflection-modal').classList.add('hidden');
+        }
+
+        function saveReflection() {
+            studentReflection.rating = document.getElementById('reflect-rating').value;
+            studentReflection.difficult = document.getElementById('reflect-difficult').value;
+            studentReflection.goal = document.getElementById('reflect-goal').value;
+            closeReflection();
+            showToast("Reflection saved locally.", "success");
+        }
+
+        function submitToTeacher() {
+            if (!studentProfile) return;
+            
+            const btn = document.getElementById('btn-submit-teacher');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Sending... ⏳';
+            btn.disabled = true;
+
+            const getPercent = (lvl) => {
+                const s = levelStats[lvl];
+                return s.total > 0 ? Math.round((s.correct / s.total) * 100) + "%" : "N/A";
+            };
+
+            const payload = {
+                timestamp: new Date().toISOString(),
+                class: studentProfile.class,
+                no: studentProfile.no,
+                name: studentProfile.name,
+                level1: badgeRecords.level1,
+                level1Percent: getPercent('level1'),
+                level2: badgeRecords.level2,
+                level2Percent: getPercent('level2'),
+                level3: badgeRecords.level3,
+                level3Percent: getPercent('level3'),
+                reflectionRating: studentReflection.rating,
+                reflectionDifficult: studentReflection.difficult,
+                reflectionGoal: studentReflection.goal
+            };
+
+            // Using no-cors fetch to ping the GAS macro. 
+            // NOTE: Google Apps Script needs to handle POST requests in doPost(e).
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                showToast("Data submitted to teacher successfully!", "success");
+            })
+            .catch(err => {
+                console.error(err);
+                // Even on error due to CORS in some setups, it often goes through if macro is open.
+                showToast("Submission might have failed. Check console.", "error");
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
